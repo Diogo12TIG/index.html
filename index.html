@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Stand DF Motors</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <h1>Stand DF Motors</h1>
+  <h2>Agendar Visita ou Test-Drive</h2>
+  <form action="guardar.php" method="post">
+    <label>Nome:
+      <input type="text" name="nome" required>
+    </label>
+
+    <label>Tipo de Visita:
+      <select name="servico" id="servico" required>
+        <option value="Visita">Visita</option>
+        <option value="Test-Drive">Test-Drive</option>
+      </select>
+    </label>
+
+    <div id="modelo-container" style="display: none;">
+      <label>Modelo do Carro:
+        <select name="modelo">
+          <option value="">-- Escolher modelo --</option>
+          <option value="Mercedes-Benz Classe C200 2011">Mercedes-Benz Classe C200 2011</option>
+          <option value="Fiat 500 2010">Fiat 500 2010</option>
+          <option value="Ford Focus C-Max 2006">Ford Focus C-Max 2006</option>
+          <option value="Renault Clio 2008">Renault Clio 2008</option>
+          <option value="Volkswagen Golf">Volkswagen Golf</option>
+        </select>
+      </label>
+    </div>
+
+    <label>Data:
+      <input type="date" name="data" id="data" required>
+    </label>
+
+    <label>Hora:
+      <select name="hora" id="hora" required>
+        <option value="">-- Escolha uma hora --</option>
+      </select>
+    </label>
+
+    <label>Contacto:
+      <input type="text" name="contacto" required>
+    </label>
+
+    <button type="submit">Agendar</button>
+  </form>
+  <br>
+  <a href="login.php"><button>Acesso Administrativo</button></a>
+</div>
+
+<script>
+  const dataInput = document.getElementById("data");
+  const horaSelect = document.getElementById("hora");
+  const modeloContainer = document.getElementById("modelo-container");
+  const servicoSelect = document.getElementById("servico");
+
+  servicoSelect.addEventListener("change", () => {
+    modeloContainer.style.display = servicoSelect.value === "Test-Drive" ? "block" : "none";
+  });
+
+  const now = new Date();
+  dataInput.min = now.toISOString().split("T")[0];
+
+  const horariosPorDia = {
+    1: { start: 9, end: 17 },  // Segunda
+    2: { start: 9, end: 18 },  // Terça
+    3: { start: 9, end: 18 },  // Quarta
+    4: { start: 9, end: 18 },  // Quinta
+    5: { start: 9, end: 17 },  // Sexta
+    6: { start: 9, end: 13 }   // Sábado
+  };
+
+  dataInput.addEventListener("change", () => {
+    const selectedDate = new Date(dataInput.value);
+    const day = selectedDate.getDay();
+
+    horaSelect.innerHTML = '<option value="">-- Escolha uma hora --</option>';
+
+    if (day === 0) {
+      alert("O stand está encerrado aos domingos.");
+      horaSelect.disabled = true;
+      return;
+    }
+
+    const hoje = new Date();
+    const hojeStr = hoje.toISOString().split("T")[0];
+
+    const horario = horariosPorDia[day];
+    if (!horario) return;
+
+    let start = horario.start;
+    const end = horario.end;
+
+    if (dataInput.value === hojeStr) {
+      const horaAtual = hoje.getHours();
+      start = Math.max(start, horaAtual + 1);
+    }
+
+    for (let h = start; h < end; h++) {
+      const horaFormatada = h.toString().padStart(2, '0') + ":00";
+      const option = document.createElement("option");
+      option.value = horaFormatada;
+      option.textContent = horaFormatada;
+      horaSelect.appendChild(option);
+    }
+    horaSelect.disabled = false;
+  });
+</script>
+</body>
+</html>
